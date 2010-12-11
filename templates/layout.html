@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+	xmlns:py="http://genshi.edgewall.org/" py:strip="">
+
+	<py:match path="head" once="true">
+	<head py:attrs="select('@*')">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="/static/style.css" type="text/css" media="screen" />
+		<title py:with="title = list(select('title/text()'))">VideoGUI<py:if test="title"> &gt; ${title}</py:if></title>
+		${select('*[local-name()!="title"]')}
+	</head>
+	</py:match>
+
+	<py:match path="body" once="true">	
+	<body py:attrs="select('@*')">
+		<div id="content">
+			${select('*|text()')}
+		</div>
+	
+		<div id="footer">
+			Powered by <a href="http://sidvind.com:8000/slideshow">VideoGUI 0.1.0</a>
+		</div>
+	
+	</body>
+	</py:match>
+
+</html>

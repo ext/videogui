@@ -1,0 +1,50 @@
+<html xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:py="http://genshi.edgewall.org/" 
+	xmlns:xi="http://www.w3.org/2001/XInclude" 
+	lang="en"> 
+	<xi:include href="layout.html" />
+<head>
+</head>
+
+<body>
+  <h1>Player</h1>
+
+  <h2>Status</h2>
+  <p>
+    <py:if test="player.status() == 1">
+      Currently playing: ${player.filename()}<br/>
+      <?python
+	 def format_time(x):
+             m, s = divmod(x, 60)
+             h, m = divmod(m, 60)
+             return "%02d:%02d:%02d" % (h, m, s)
+
+         def progress(pos, total, length=25):
+             d = pos / total
+             n1 = int(d * length)
+             n2 = length - n1
+             return '#'*n1 + '-'*n2
+
+	 pos = player.position()
+	 length = player.length()
+	 ?>
+      <pre>${format_time(pos)} ${progress(pos, length)} ${format_time(length)}</pre>
+      ${player._proc.p_sub}
+    </py:if>
+  </p>
+
+  <py:if test="player.status() == 1">
+    <h2>Controls</h2>
+    <b>
+      <a href="/player/seek/-60">≪</a>
+      <a href="/player/seek/-10">&lt;</a>
+      <a href="/player/stop">Stop</a>
+      <a href="/player/pause">Pause</a>
+      <a href="/player/seek/10">&gt;</a>
+      <a href="/player/seek/60">≫</a>
+    </b>
+  </py:if>
+  <hr/>
+</body>
+
+</html>

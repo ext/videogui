@@ -1,0 +1,19 @@
+#items ul {
+    margin-left: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+#items li {
+    margin: 0;
+    padding: 0;
+    padding-left: 20px;
+    padding-top: 5px;
+    background-repeat: no-repeat;
+    background-position: 0 4px;
+}
+
+#items pre {
+    margin: 0;
+    padding: 0;
+}
