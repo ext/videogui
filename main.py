@@ -108,7 +108,10 @@ class Folder(Item):
 
 class File(Item):
 	# known video extensions
-	extensions = ['avi', 'mkv', 'wmv', 'mov', 'mp4', 'm4v', 'mpg', 'mpeg', 'img', 'flv']
+	video_extensions = ['avi', 'mkv', 'wmv', 'mov', 'mp4', 'm4v', 'mpg', 'mpeg', 'img', 'flv']
+
+	# playlist extensions
+	playlist_extensions = ['playlist']
 
 	# show for video files only
 	action_menu = '[<a href="/play/{url}">play</a>]'
@@ -120,14 +123,23 @@ class File(Item):
 		self._size = statinfo.st_size
 
 		# try to detect video files
-		_, self._ext = os.path.splitext(base)
-		self._is_video = self._ext[1:].lower() in File.extensions
+		self._ext = os.path.splitext(base)[1][1:].lower()
+		self._is_video = self._ext in File.video_extensions
+		self._is_playlist = self._ext in File.playlist_extensions
 
 	def is_video(self):
 		return self._is_video
 
+	def is_playlist(self):
+		return self._is_playlist
+
 	def image(self):
-		return self.is_video() and 'film.png' or 'page_white.png'
+		if self.is_video():
+			return 'film.png'
+		if self.is_playlist():
+			return 'film_link.png'
+		
+		return 'page_white.png'
 
 	def __str__(self):
 		tpath = trunc(self._base, size=35)
@@ -138,10 +150,10 @@ class File(Item):
 			'size': format_size(self._size)
 		}
 
-		actions = ''
-		if self.is_video():
-			actions = File.action_menu.format(**fields)
-		
+		if not (self.is_video() or self.is_playlist()):
+			return '{name}{padding} {size:>5}'.format(**fields)
+
+		actions = File.action_menu.format(**fields)
 		return '<a href="/info/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
 			
 
