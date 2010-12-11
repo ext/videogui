@@ -107,20 +107,43 @@ class Folder(Item):
 			url=urllib.quote(self._path), name=tpath, padding=' '*(35-len(tpath)))
 
 class File(Item):
+	# known video extensions
+	extensions = ['avi', 'mkv', 'wmv', 'mov', 'mp4', 'm4v', 'mpg', 'mpeg', 'img', 'flv']
+
+	# show for video files only
+	action_menu = '[<a href="/play/{url}">play</a>]'
+
 	def __init__(self, root, path, base):
 		Item.__init__(self, root, path, base)
 			
 		statinfo = os.stat(self._fullpath)
 		self._size = statinfo.st_size
 
+		# try to detect video files
+		_, self._ext = os.path.splitext(base)
+		self._is_video = self._ext[1:].lower() in File.extensions
+
+	def is_video(self):
+		return self._is_video
 
 	def image(self):
-		return 'film.png'
+		return self.is_video() and 'film.png' or 'page_white.png'
 
 	def __str__(self):
 		tpath = trunc(self._base, size=35)
-		return '<a href="/info/{url}">{name}</a>{padding} {size:>5} [<a href="/play/{url}">play</a>]'.format(
-			url=urllib.quote(self._path), name=tpath, padding=' '*(35-len(tpath)), size=format_size(self._size))
+		fields = {
+			'url': urllib.quote(self._path),
+			'name': tpath,
+			'padding': ' '*(35-len(tpath)),
+			'size': format_size(self._size)
+		}
+
+		actions = ''
+		if self.is_video():
+			actions = File.action_menu.format(**fields)
+		
+		return '<a href="/info/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
+			
 
 class Unknown(Item):
 	def image(self):
