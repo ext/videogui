@@ -165,24 +165,16 @@ class Unknown(Item):
 		return trunc(self._path)
 
 class Player:
-	STOPPED = 0
-	RUNNING = 1
-
 	def __init__(self):
 		self._engines = {
 			'mplayer': self._mplayer,
 			'vlc': self._cvlc
 			}
 
-		self._status = Player.STOPPED
 		self._proc = pymplb.MPlayer(fs=True, env={'DISPLAY': ':0', 'TERM': 'xterm'})
 
-	def status(self):
-		#if self._proc != None:
-		#	if self._proc.poll():
-		#		self._proc = None
-
-		return self._status
+	def is_playing(self):
+		return self._proc.p_filename != None
 
 	def filename(self):
 		return self._proc.p_filename
@@ -194,10 +186,6 @@ class Player:
 		return self._proc.p_length
 
 	def play(self, target, engine, *args, **kwargs):
-		#if self._status != Player.STOPPED:
-		#	raise RuntimeError('Player already playing')
-
-		#self._filename = target
 		e = self._engines[engine]
 		e(target, *args, **kwargs)
 
@@ -214,7 +202,6 @@ class Player:
 			args.append(v)
 
 		self._proc.loadfile(target)
-		self._status = Player.RUNNING
 
 	def _cvlc(self, target, *args, **kwargs):
 		pass

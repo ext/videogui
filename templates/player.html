@@ -11,7 +11,7 @@
 
   <h2>Status</h2>
   <p>
-    <py:if test="player.status() == 1">
+    <py:if test="player.is_playing()">
       Currently playing: ${player.filename()}<br/>
       <?python
 	 def format_time(x):
@@ -33,7 +33,7 @@
     </py:if>
   </p>
 
-  <py:if test="player.status() == 1">
+  <py:if test="player.is_playing()">
     <h2>Controls</h2>
     <b>
       <a href="/player/seek/-60">≪</a>
