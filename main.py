@@ -5,6 +5,7 @@ import template
 import urllib
 import subprocess
 import pymplb
+import re
 
 def connect(*args):
         cherrypy.thread_data.db = sqlite3.connect('site.db')
@@ -34,6 +35,21 @@ def format_size(size):
 
 	print size
 	return '%d%s' % (round(size), s)
+
+# natural sorting from http://code.activestate.com/recipes/285264-natural-string-sorting/
+def try_int(s):
+        "Convert to integer if possible."
+        try: return int(s)
+        except: return s
+def natsort_key(s):
+        "Used internally to get a tuple by which s is sorted."
+        return map(try_int, re.findall(r'(\d+|\D+)', s))
+def natcmp(a, b):
+        "Natural string comparison, case sensitive."
+        return cmp(natsort_key(a), natsort_key(b))
+def natcasecmp(a, b):
+        "Natural string comparison, ignores case."
+        return natcmp(a.lower(), b.lower())
 		
 class Item:
 	def __init__(self, root, path, base):
@@ -58,6 +74,28 @@ class Item:
 			return File(root, path, base)
 		else:
 			return Unknown(root, path, base)
+
+	@staticmethod
+	def compare(a, b):
+		# for instances of the same type, compare the basename
+		if a.__class__ == b.__class__:
+			return natcasecmp(a._base, b._base)
+
+		# for instances of different classes, prioritize in this order:
+		# 1. folder
+		# 2. files
+		# 3. unknown
+		p = [Folder, File, Unknown]
+
+		for t in p:
+			if isinstance(a, t):
+				return -1
+			if isinstance(b, t):
+				return 1
+
+		# now if we reach this we probably have an invalid item in the list
+		# but lets try to compare it anyway
+		return natcasecmp(a._base, b._base)
 
 class Folder(Item):
 	def image(self):
@@ -145,7 +183,6 @@ class Player:
 
 	def _cvlc(self, target, *args, **kwargs):
 		pass
-	
 
 cherrypy.engine.subscribe('start_thread', connect)
 player = Player()
@@ -171,6 +208,7 @@ class Root(object):
 			content.insert(0, '..')
 
 		item = [Item.create(root, os.path.join(path + (x,)), x) for x in content]
+		item.sort(cmp=Item.compare)
 
 		return template.render(path=os.path.join('/', *path), item=item)
 
