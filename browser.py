@@ -5,8 +5,13 @@ from item import Item
 
 class Browser(object):
 	@cherrypy.expose
-	@template.output('view.html')
-	def index(self, *path):
+	def index(self):
+            raise cherrypy.InternalRedirect('/browser/list')
+
+
+        @cherrypy.expose
+        @template.output('view.html')
+        def list(self, *path):
 		root = cherrypy.request.app.config['video']['path']
 		fullpath = os.path.join(root, *path)
 

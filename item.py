@@ -89,7 +89,7 @@ class Folder(Item):
 
 	def __str__(self):
 		tpath = trunc(self._base, size=35)
-		return '<a href="/view/{url}">{name}</a>{padding}     - '.format(
+		return '<a href="/browser/list/{url}">{name}</a>{padding}     - '.format(
 			url=urllib.quote(self._path), name=tpath, padding=' '*(35-len(tpath)))
 
 class File(Item):
