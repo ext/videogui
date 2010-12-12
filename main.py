@@ -6,7 +6,7 @@ import urllib
 import subprocess
 import re
 import traceback
-from player import Player
+from player import get_player
 
 def connect(*args):
         cherrypy.thread_data.db = sqlite3.connect('site.db')
@@ -163,7 +163,7 @@ class Unknown(Item):
 cherrypy.engine.subscribe('start_thread', connect)
 
 class Root(object):
-	player = Player()
+	player = get_player()
 
         @cherrypy.expose
 	@template.output('frame.html', doctype='xhtml-frameset')

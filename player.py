@@ -82,3 +82,12 @@ class Player:
                     'position': self.position(),
                     'length': self.length()
                     })
+
+# creating a "singleton" so that even if cherrypy reloads some modules
+# it will still keep this instance and keep track of current video
+# won't work in all cases ofcourse, but some is better than none in
+# this case.
+_inst = Player()
+
+def get_player():
+    return _inst
