@@ -34,7 +34,6 @@ def format_size(size):
 		s = suffix.pop(0)
 		size /= 1024.0
 
-	print size
 	return '%d%s' % (round(size), s)
 
 # natural sorting from http://code.activestate.com/recipes/285264-natural-string-sorting/
@@ -65,7 +64,6 @@ class Item:
 	@staticmethod
 	def create(root, path, base):
 		fullpath = os.path.join(root, *path)
-		print 'fullpath', fullpath
 
 		if base == '..':
 			return Folder(root, path, '..')
