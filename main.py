@@ -161,10 +161,9 @@ class Unknown(Item):
 		return trunc(self._path)
 
 cherrypy.engine.subscribe('start_thread', connect)
-player = Player()
 
 class Root(object):
-	player = player
+	player = Player()
 
         @cherrypy.expose
 	@template.output('frame.html', doctype='xhtml-frameset')
