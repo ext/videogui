@@ -44,13 +44,19 @@ function progressbar(pos, total, length){
     return '#'.repeat(n1) + '-'.repeat(n2);
 }
 
+var playing = true;
 $(document).everyTime(1000, function() {
+    if ( !playing ){
+	return;
+    }
+
     $.getJSON('/player/player_progress', function(data) {
 	playing = data['playing'];
 	
 	if ( !playing ){
 	    $('#status').html('<p>Not playing.</p>');
 	    $('#progress').hide();
+	    playing = false;
 	    return;
 	}
 
@@ -84,6 +90,7 @@ function pause(){
 
 function loadfile(url){
     action('loadfile/' + url);
+    playing = true;
 }
 
 function action(x){
