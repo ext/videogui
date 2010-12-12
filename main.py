@@ -7,6 +7,7 @@ import subprocess
 import pymplb
 import re
 import traceback
+import json
 
 def connect(*args):
         cherrypy.thread_data.db = sqlite3.connect('site.db')
@@ -208,7 +209,24 @@ class Player:
 cherrypy.engine.subscribe('start_thread', connect)
 player = Player()
 
+class Ajax(object):
+	@cherrypy.expose
+	def player_progress(self):
+		global player
+
+		if not player.is_playing():
+			return json.dumps({'playing': False})
+
+		return json.dumps({
+				'playing': True,
+				'filename': player.filename(),
+				'position': player.position(),
+				'length': player.length()
+			})
+
 class Root(object):
+	ajax = Ajax()
+
         @cherrypy.expose
 	@template.output('frame.html', doctype='xhtml-frameset')
         def index(self):
