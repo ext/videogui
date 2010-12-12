@@ -6,14 +6,15 @@ import traceback
 import os
 
 def catch(func):
-	""" catches all exceptions and returns them as a string. """
-	def wrapper(*args, **kwargs):
-		try:
-			return func(*args, **kwargs)
-		except:
-			return traceback.format_exc()
-	return wrapper
-
+    """ catches all exceptions and returns them as a string. """
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except:
+            traceback.print_exc()
+            return traceback.format_exc()
+    return wrapper
+    
 class Player:
 	def __init__(self):
 		self._engines = {
@@ -37,12 +38,30 @@ class Player:
 
         @cherrypy.expose
         @catch
-	def loadfile(self, *path):
-		e = self._engines['mplayer']
-		root = cherrypy.request.app.config['video']['path']
-		fullpath = os.path.join(root, *path)
+	def loadfile(self, *url):
+            self._loadfile_int(url)
 
-		e(fullpath, '-fs', '-really-quiet', ao='alsa')
+        @cherrypy.expose
+        @catch
+        def queue(self, *url):
+            self._loadfile_int(url, append=1)
+
+        def _loadfile_int(self, url, append=0):
+            root = cherrypy.request.app.config['video']['path']
+            fullpath = os.path.join(root, *url)
+
+            if os.path.splitext(fullpath)[1].lower() == '.playlist':
+                with open(fullpath, 'r') as fp:
+                    playlist = fp.readlines()
+                    
+                    for item in playlist:
+                        item_url = url[:-1] + (item[:-1],)
+                        self._loadfile_int(item_url, append=1)
+                
+                return
+
+            print 'loadfile', fullpath, append
+            self._proc.loadfile(fullpath, append)
 
 	@cherrypy.expose
 	@template.output('player.html')
@@ -55,17 +74,12 @@ class Player:
 		self._proc.stop()
 
 	@cherrypy.expose
-	@catch
+        @catch
 	def seek(self, pos, type=0):
 		self._proc.seek(float(pos), type)
 
 	def _mplayer(self, target, *args, **kwargs):
-		args = list(args)
-		for k,v in kwargs.items():
-			args.append(k)
-			args.append(v)
-
-		self._proc.loadfile(target)
+            pass
 
 	def _cvlc(self, target, *args, **kwargs):
 		pass
@@ -81,12 +95,3 @@ class Player:
                     'position': self.position(),
                     'length': self.length()
                     })
-
-# creating a "singleton" so that even if cherrypy reloads some modules
-# it will still keep this instance and keep track of current video
-# won't work in all cases ofcourse, but some is better than none in
-# this case.
-_inst = Player()
-
-def get_player():
-    return _inst

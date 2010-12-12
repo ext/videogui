@@ -6,7 +6,7 @@ import urllib
 import subprocess
 import re
 import traceback
-from player import get_player
+from player import Player
 from browser import Browser
 
 def connect(*args):
@@ -17,7 +17,7 @@ def connect(*args):
 cherrypy.engine.subscribe('start_thread', connect)
 
 class Root(object):
-	player = get_player()
+	player = Player()
 	browser = Browser()
 
         @cherrypy.expose
