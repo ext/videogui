@@ -6,6 +6,7 @@ import urllib
 import subprocess
 import pymplb
 import re
+import traceback
 
 def connect(*args):
         cherrypy.thread_data.db = sqlite3.connect('site.db')
@@ -114,7 +115,7 @@ class File(Item):
 	playlist_extensions = ['playlist']
 
 	# show for video files only
-	action_menu = '[<a href="/play/{url}">play</a>]'
+	action_menu = '[<a href="/play/{url}" target="player">play</a>]'
 
 	def __init__(self, root, path, base):
 		Item.__init__(self, root, path, base)
@@ -211,8 +212,9 @@ player = Player()
 
 class Root(object):
         @cherrypy.expose
+	@template.output('frame.html', doctype='xhtml-frameset')
         def index(self):
-                raise cherrypy.InternalRedirect('/view')
+                return template.render()
 
 	@cherrypy.expose
 	@template.output('view.html')
@@ -223,6 +225,7 @@ class Root(object):
 		try:
 			content = os.listdir(fullpath)
 		except OSError:
+			traceback.print_exc()
 			return 'No such file or directory: %s' % os.path.join('/', *path)
 
 		# want to include a '..' back link
