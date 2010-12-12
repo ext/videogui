@@ -65,7 +65,6 @@ class Player:
 			args.append(k)
 			args.append(v)
 
-                print 'playing', target
 		self._proc.loadfile(target)
 
 	def _cvlc(self, target, *args, **kwargs):
