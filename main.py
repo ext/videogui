@@ -13,9 +13,6 @@ def connect(*args):
         cherrypy.thread_data.db.row_factory = sqlite3.Row
         cherrypy.thread_data.db.cursor().execute('PRAGMA foreign_keys = ON')
 
-def get_path():
-	return cherrypy.request.app.config['video']['path']
-
 def trunc(string, size=35, suffix='..'):
 	""" Truncates a string to size, appending a suffix. """
 	msize = size - len(suffix)
@@ -113,7 +110,7 @@ class File(Item):
 	playlist_extensions = ['playlist']
 
 	# show for video files only
-	action_menu = '[<a href="/play/{url}" target="player">play</a>]'
+	action_menu = '[<a href="javascript:loadfile(\'{url}\');" target="player">play</a>]'
 
 	def __init__(self, root, path, base):
 		Item.__init__(self, root, path, base)
@@ -167,7 +164,7 @@ cherrypy.engine.subscribe('start_thread', connect)
 player = Player()
 
 class Root(object):
-	ajax = player 
+	player = player
 
         @cherrypy.expose
 	@template.output('frame.html', doctype='xhtml-frameset')
@@ -177,7 +174,7 @@ class Root(object):
 	@cherrypy.expose
 	@template.output('view.html')
 	def view(self, *path):
-		root = get_path()
+		root = cherrypy.request.app.config['video']['path']
 		fullpath = os.path.join(root, *path)
 
 		try:
@@ -194,20 +191,6 @@ class Root(object):
 		item.sort(cmp=Item.compare)
 
 		return template.render(path=os.path.join('/', *path), item=item)
-
-	@cherrypy.expose
-	def play(self, *path):
-		global player
-		root = get_path()
-		fullpath = os.path.join(root, *path)
-
-		player.play(fullpath, 'mplayer', '-fs', '-really-quiet', ao='alsa')
-		raise cherrypy.HTTPRedirect('/player')
-
-	@cherrypy.expose
-	@template.output('player.html')
-	def player(self, action='status', *args):
-		return template.render()
 		
 application = cherrypy.tree.mount(Root(), '/', config='site.conf')
 application.config.update({

@@ -1,6 +1,9 @@
 import pymplb
 import cherrypy
 import json
+import template
+import traceback
+import os
 
 def catch(func):
 	""" catches all exceptions and returns them as a string. """
@@ -32,9 +35,19 @@ class Player:
 	def length(self):
 		return self._proc.p_length
 
-	def play(self, target, engine, *args, **kwargs):
-		e = self._engines[engine]
-		e(target, *args, **kwargs)
+        @cherrypy.expose
+        @catch
+	def loadfile(self, *path):
+		e = self._engines['mplayer']
+		root = cherrypy.request.app.config['video']['path']
+		fullpath = os.path.join(root, *path)
+
+		e(fullpath, '-fs', '-really-quiet', ao='alsa')
+
+	@cherrypy.expose
+	@template.output('player.html')
+	def index(self):
+		return template.render()
 
 	@cherrypy.expose
 	@catch
@@ -52,6 +65,7 @@ class Player:
 			args.append(k)
 			args.append(v)
 
+                print 'playing', target
 		self._proc.loadfile(target)
 
 	def _cvlc(self, target, *args, **kwargs):

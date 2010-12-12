@@ -45,7 +45,7 @@ function progressbar(pos, total, length){
 }
 
 $(document).everyTime(1000, function() {
-    $.getJSON('ajax/player_progress', function(data) {
+    $.getJSON('/player/player_progress', function(data) {
 	playing = data['playing'];
 	
 	if ( !playing ){
@@ -82,9 +82,13 @@ function pause(){
     action('pause');
 }
 
+function loadfile(url){
+    action('loadfile/' + url);
+}
+
 function action(x){
     $.ajax({
-	url: 'ajax/' + x,
+	url: '/player/' + x,
 	complete: function(req, code) {
 	    var data = req.responseText;
 	    if ( req.status != 200 ){
