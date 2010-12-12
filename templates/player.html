@@ -15,18 +15,15 @@
   <div id="status">&nbsp;</div>
   <pre id="progress">&nbsp;</pre>
 
-  <py:if test="player.is_playing()">
-    <h2>Controls</h2>
-    <b>
-      <a href="/player/seek/-60">≪</a>
-      <a href="/player/seek/-10">&lt;</a>
-      <a href="/player/stop">Stop</a>
-      <a href="/player/pause">Pause</a>
-      <a href="/player/seek/10">&gt;</a>
-      <a href="/player/seek/60">≫</a>
-    </b>
-  </py:if>
-  <hr/>
+  <h2>Controls</h2>
+  <b>
+    <a href="#" onclick="seek(-60); return false;">≪</a>
+    <a href="#" onclick="seek(-10); return false;">&lt;</a>
+    <a href="#" onclick="stop(); return false;">Stop</a>
+    <a href="#" onclick="pause(); return false;">Pause</a>
+    <a href="#" onclick="seek(10); return false;">&gt;</a>
+    <a href="#" onclick="seek(60); return false;">≫</a>
+  </b>
 </body>
 
 </html>

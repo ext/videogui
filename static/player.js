@@ -69,3 +69,33 @@ $(document).everyTime(1000, function() {
 	    '</p>');
     });
 });
+
+function seek(loc){
+    action('seek/' + loc);
+}
+
+function stop(){
+    action('stop');
+}
+
+function pause(){
+    action('pause');
+}
+
+function action(x){
+    $.ajax({
+	url: 'ajax/' + x,
+	complete: function(req, code) {
+	    var data = req.responseText;
+	    if ( req.status != 200 ){
+		alert('Action "' + x + '" failed with code ' + req.status);
+		return;
+	    }
+
+	    if ( data != '' ){
+		alert('Action "' + x + '" failed: \n\n' + data);
+		return;
+	    }
+	}
+    });
+}

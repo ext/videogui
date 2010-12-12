@@ -164,6 +164,15 @@ class Unknown(Item):
 	def __str__(self):
 		return trunc(self._path)
 
+def catch(func):
+	""" catches all exceptions and returns them as a string. """
+	def wrapper(*args, **kwargs):
+		try:
+			return func(*args, **kwargs)
+		except:
+			return traceback.format_exc()
+	return wrapper
+
 class Player:
 	def __init__(self):
 		self._engines = {
@@ -189,11 +198,15 @@ class Player:
 		e = self._engines[engine]
 		e(target, *args, **kwargs)
 
+	@cherrypy.expose
+	@catch
 	def stop(self):
 		self._proc.stop()
 
+	@cherrypy.expose
+	@catch
 	def seek(self, pos, type=0):
-		self._proc.seek(pos, type)
+		self._proc.seek(float(pos), type)
 
 	def _mplayer(self, target, *args, **kwargs):
 		args = list(args)
@@ -206,10 +219,6 @@ class Player:
 	def _cvlc(self, target, *args, **kwargs):
 		pass
 
-cherrypy.engine.subscribe('start_thread', connect)
-player = Player()
-
-class Ajax(object):
 	@cherrypy.expose
 	def player_progress(self):
 		global player
@@ -224,8 +233,11 @@ class Ajax(object):
 				'length': player.length()
 			})
 
+cherrypy.engine.subscribe('start_thread', connect)
+player = Player()
+
 class Root(object):
-	ajax = Ajax()
+	ajax = player 
 
         @cherrypy.expose
 	@template.output('frame.html', doctype='xhtml-frameset')
@@ -265,17 +277,7 @@ class Root(object):
 	@cherrypy.expose
 	@template.output('player.html')
 	def player(self, action='status', *args):
-		global player
-
-		if action == 'stop':
-			player.stop()
-			raise cherrypy.HTTPRedirect('/view')
-
-		if action == 'seek':
-			player.seek(float(args[0]))
-			raise cherrypy.HTTPRedirect('/player')
-
-		return template.render(player=player)
+		return template.render()
 		
 application = cherrypy.tree.mount(Root(), '/', config='site.conf')
 application.config.update({
