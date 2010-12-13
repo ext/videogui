@@ -39,6 +39,7 @@ class Player:
         @cherrypy.expose
         @catch
 	def loadfile(self, *url):
+            print 'loadfile', url
             self._loadfile_int(url)
 
         @cherrypy.expose
@@ -60,8 +61,8 @@ class Player:
                 
                 return
 
-            print 'loadfile', fullpath, append
-            self._proc.loadfile(fullpath, append)
+            print 'proc::loadfile', fullpath, append
+            self._proc.loadfile('"' + fullpath + '"', append)
 
 	@cherrypy.expose
 	@template.output('player.html')

@@ -24,14 +24,6 @@ class Root(object):
 	@template.output('frame.html', doctype='xhtml-frameset')
         def index(self):
                 return template.render()
-
-	@cherrypy.expose
-	@template.output('info.html')
-	def info(self, *path):
-		root = cherrypy.request.app.config['video']['path']
-		fullpath = os.path.join(root, *path)
-
-		return template.render(path=os.path.join('/', *path))
 		
 application = cherrypy.tree.mount(Root(), '/', config='site.conf')
 application.config.update({
