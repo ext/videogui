@@ -4,10 +4,15 @@
 	lang="en"> 
 	<xi:include href="layout.html" />
 <head>
+  <script type="text/javascript">
+    $(document).ready(function() {
+     $('.edit').editable('/browser/put/${url}');
+    });
+  </script>
 </head>
 
 <body>
-  <h1>${file.title()}</h1>
+  <h1 id="title" class="edit">${file.title()}</h1>
   <p>[imdb] [filmtipset]</p>
 
   <table>

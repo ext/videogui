@@ -2,6 +2,7 @@ import cherrypy
 import template
 import os
 from item import Item
+import urllib
 
 class Browser(object):
     @cherrypy.expose
@@ -35,9 +36,29 @@ class Browser(object):
         
     @cherrypy.expose
     @template.output('info.html')
-    def details(self, *path):
+    def get(self, *path):
         root = cherrypy.request.app.config['video']['path']
         fullpath = os.path.join(root, *path)
+
         f = Item.create(root, path, path[-1])
+        url = urllib.quote(os.path.join(*path).encode('utf-8'))
+
+        return template.render(url=url, file=f)
+
+    @cherrypy.expose
+    def put(self, *path, **post):
+        root = cherrypy.request.app.config['video']['path']
+        fullpath = os.path.join(root, *path)
+
+        f = Item.create(root, path, path[-1])
+
+        id = post['id']
+        value = post['value']
+
+        # title is a special case, as it is normalized in the database
+        if id == 'title':
+            f.set_title(value)
+        else:
+            raise NotImplementedError, 'setting metadata is not yet implemented'
         
-        return template.render(path=os.path.join('/', *path), file=f)
+        return value

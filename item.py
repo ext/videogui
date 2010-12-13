@@ -164,7 +164,7 @@ class File(Item):
 			return '{name}{padding} {size:>5}'.format(**fields)
 
 		actions = File.action_menu.format(**fields)
-		return u'<a href="/browser/details/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
+		return u'<a href="/browser/get/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
 			
 
 class Unknown(Item):
