@@ -14,7 +14,6 @@ class Browser(object):
         path = tuple([unicode(x) for x in path])
         root = unicode(cherrypy.request.app.config['video']['path'])
         fullpath = os.path.join(root, *path)
-        print fullpath, type(fullpath)
         # list all files and directories
         try:
             content = os.listdir(fullpath)

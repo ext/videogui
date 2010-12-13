@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import os
 import re
 import urllib
@@ -119,7 +122,6 @@ class File(Item):
 
 		# query metadata
 		db = cherrypy.thread_data.db.cursor()
-		print 'path', self._path
 		row = db.execute('SELECT title, hash FROM item WHERE path = :path LIMIT 1', dict(path=self._path)).fetchone()
 		if row:
 			self._title = row['title']
@@ -141,7 +143,6 @@ class File(Item):
 
 	def __str__(self):
 		tpath = trunc(self._title, size=Item.width)
-		print '__str__', self._path, type(self._path)
 		fields = {
 			'url': urllib.quote(self._path.encode('utf-8')),
 			'name': tpath,
