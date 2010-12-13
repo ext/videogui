@@ -1,6 +1,7 @@
 import os
 import re
 import urllib
+import cherrypy
 
 def trunc(string, size=35, suffix='..'):
 	""" Truncates a string to size, appending a suffix. """
@@ -39,11 +40,14 @@ def natcasecmp(a, b):
 
 
 class Item:
+	width = 65
+
 	def __init__(self, root, path, base):
 		self._root = root
 		self._path = os.path.join(*path)
 		self._base = base
 		self._fullpath = os.path.join(root, *path)
+		self._title = self._base
 
 	def image(self):
 		raise NotImplementedError
@@ -65,7 +69,7 @@ class Item:
 	def compare(a, b):
 		# for instances of the same type, compare the basename
 		if a.__class__ == b.__class__:
-			return natcasecmp(a._base, b._base)
+			return natcasecmp(a._title, b._title)
 
 		# for instances of different classes, prioritize in this order:
 		# 1. folder
@@ -81,16 +85,16 @@ class Item:
 
 		# now if we reach this we probably have an invalid item in the list
 		# but lets try to compare it anyway
-		return natcasecmp(a._base, b._base)
+		return natcasecmp(a._title, b._title)
 
 class Folder(Item):
 	def image(self):
 		return 'folder.png'
 
 	def __str__(self):
-		tpath = trunc(self._base, size=35)
+		tpath = trunc(self._base, size=Item.width)
 		return '<a href="/browser/list/{url}">{name}</a>{padding}     - '.format(
-			url=urllib.quote(self._path), name=tpath, padding=' '*(35-len(tpath)))
+			url=urllib.quote(self._path.encode('utf-8')), name=tpath, padding=' '*(Item.width-len(tpath)))
 
 class File(Item):
 	# known video extensions
@@ -113,6 +117,14 @@ class File(Item):
 		self._is_video = self._ext in File.video_extensions
 		self._is_playlist = self._ext in File.playlist_extensions
 
+		# query metadata
+		db = cherrypy.thread_data.db.cursor()
+		print 'path', self._path
+		row = db.execute('SELECT title, hash FROM item WHERE path = :path LIMIT 1', dict(path=self._path)).fetchone()
+		if row:
+			self._title = row['title']
+			self._hash = row['hash']
+
 	def is_video(self):
 		return self._is_video
 
@@ -128,11 +140,12 @@ class File(Item):
 		return 'page_white.png'
 
 	def __str__(self):
-		tpath = trunc(self._base, size=35)
+		tpath = trunc(self._title, size=Item.width)
+		print '__str__', self._path, type(self._path)
 		fields = {
-			'url': urllib.quote(self._path),
+			'url': urllib.quote(self._path.encode('utf-8')),
 			'name': tpath,
-			'padding': ' '*(35-len(tpath)),
+			'padding': ' '*(Item.width-len(tpath)),
 			'size': format_size(self._size)
 		}
 
@@ -140,7 +153,7 @@ class File(Item):
 			return '{name}{padding} {size:>5}'.format(**fields)
 
 		actions = File.action_menu.format(**fields)
-		return '<a href="/browser/details/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
+		return u'<a href="/browser/details/{url}">{name}</a>{padding} {size:>5} {actions}'.format(actions=actions, **fields)
 			
 
 class Unknown(Item):

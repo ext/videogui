@@ -11,9 +11,10 @@ class Browser(object):
     @cherrypy.expose
     @template.output('view.html')
     def list(self, *path):
-        root = cherrypy.request.app.config['video']['path']
+        path = tuple([unicode(x) for x in path])
+        root = unicode(cherrypy.request.app.config['video']['path'])
         fullpath = os.path.join(root, *path)
-        
+        print fullpath, type(fullpath)
         # list all files and directories
         try:
             content = os.listdir(fullpath)
