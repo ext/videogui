@@ -126,6 +126,16 @@ class File(Item):
 		if row:
 			self._title = row['title']
 			self._hash = row['hash']
+		else:
+			db.execute('INSERT INTO item (path, title) VALUES (:path, :title)', dict(path=self._path, title=self._title))
+			cherrypy.thread_data.db.commit()
+
+	def title(self):
+		return self._title
+
+	def set_title(self, title):
+		cherrypy.thread_data.db.cursor().execute('UPDATE item SET title = :title WHERE path = :path', dict(path=self._path, title=title))
+		cherrypy.thread_data.db.commit()
 
 	def is_video(self):
 		return self._is_video

@@ -38,5 +38,6 @@ class Browser(object):
     def details(self, *path):
         root = cherrypy.request.app.config['video']['path']
         fullpath = os.path.join(root, *path)
+        f = Item.create(root, path, path[-1])
         
-        return template.render(path=os.path.join('/', *path))
+        return template.render(path=os.path.join('/', *path), file=f)
