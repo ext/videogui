@@ -43,10 +43,15 @@ class Browser(object):
         f = Item.create(root, path, path[-1])
         url = urllib.quote(os.path.join(*path).encode('utf-8'))
 
-        refs = {}
+        refs = []
         for x in cherrypy.request.app.config['refs']:
-            refs[x] = cherrypy.request.app.config['refs'][x]
-        print refs
+            ref = x
+            href = '#'
+            try:
+                href = cherrypy.request.app.config['refs'][x].format(id=f[x])
+            except KeyError:
+                pass
+            refs.append((x, href))
 
         # meta data which is always visible
         meta = {
@@ -74,3 +79,13 @@ class Browser(object):
             raise NotImplementedError, 'setting metadata is not yet implemented'
         
         return value
+
+    @cherrypy.expose
+    def rescan(self, *path):
+        root = cherrypy.request.app.config['video']['path']
+        fullpath = os.path.join(root, *path)
+
+        f = Item.create(root, path, path[-1])
+        f.rescan()
+        
+        raise cherrypy.HTTPRedirect('/browser/get/' + os.path.join(*path))

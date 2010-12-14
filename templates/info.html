@@ -28,17 +28,18 @@
 <body>
   <h1 id="title" class="edit">${file.title()}</h1>
   <p>
-    <py:for each="ref, url in refs.items()">
-      [<a href="${url}">${ref}</a>]
+    <py:for each="ref, href in refs">
+      [<a href="${href}" id="${ref}" class="edit">${ref}</a> <img src="/static/page_edit.png" class="edit-activate" title="Edit" />]
     </py:for>
+    <a href="/browser/rescan/${url}"><img src="/static/arrow_refresh.png" title="Refresh metadata"/></a>
   </p>
 
   <table>
     <tr><td>Filename</td><td class="static">${file.basename()}</td></tr>
     <tr><td>Size</td><td class="static">${file.size()}</td></tr>
-    <tr><td>Length</td><td class="static">${file.length()}</td></tr>
-    <tr><td>Codec</td><td class="static">Video ${file.video_codec()} Audio ${file.audio_codec()}</td></tr>
-    <tr><td>Resolution</td><td class="static">${file.resolution()}</td></tr>
+    <tr><td>Length</td><td class="static">${file.length() or 'unknown'}</td></tr>
+    <tr><td>Codec</td><td class="static">Video ${file.video_codec() or 'unknown'} Audio ${file.audio_codec() or 'unknown'}</td></tr>
+    <tr><td>Resolution</td><td class="static">${file.resolution() or 'unknown'}</td></tr>
     <tr py:for="key, value in meta.items()">
       <td>${key}</td>
       <td>

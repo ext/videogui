@@ -25,3 +25,7 @@
 .static {
     color: #888;
 }
+
+.edit-activate {
+    cursor: pointer;
+}

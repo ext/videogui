@@ -127,13 +127,8 @@ class File(Item):
 		if row:
 			self._title = row['title']
 		else:
-			meta = []
-
-			if self.is_video():
-				meta += self._retrieve_metadata()
-
 			db.execute('INSERT INTO item (path, title) VALUES (:path, :title)', dict(path=self._path, title=self._title))
-			db.executemany('INSERT INTO item_meta (path, key, value) VALUES (?, ?, ?)', meta)
+			self.rescan()
 			cherrypy.thread_data.db.commit()
 
 		self._meta = {}
@@ -141,6 +136,16 @@ class File(Item):
 			key = row['key']
 			value = row['value']
 			self._meta[key] = value
+
+	def rescan(self):
+		meta = []
+
+		if self.is_video():
+			meta += self._retrieve_metadata()
+
+		cherrypy.thread_data.db.executemany('INSERT INTO item_meta (path, key, value) VALUES (?, ?, ?)', meta)
+		cherrypy.thread_data.db.commit()
+		
 	
 	def _retrieve_metadata(self):
 		proc = subprocess.Popen(['midentify', self._fullpath], stdout=subprocess.PIPE)
@@ -179,13 +184,23 @@ class File(Item):
 	def basename(self):
 		return self._base
 
+	def __getitem__(self, key):
+		return self._meta[key]
+
+	def get_meta(self, key, default=None):
+		return self._meta.get(key, default)			
+
 	def size(self, format=True):
 		if format:
 			return format_size(self._size)
 		return self._size
 
 	def length(self, format=True):
-		x = float(self._meta.get('ID_LENGTH', 0))
+		try:
+			x = float(self._meta['ID_LENGTH'])
+		except KeyError:
+			return None
+
 		if format:
 			m, s = divmod(x, 60)
 			h, m = divmod(m, 60)
@@ -196,7 +211,7 @@ class File(Item):
 		return self._meta.get('ID_VIDEO_FORMAT', None)
 
 	def audio_codec(self):
-		return self._meta.get('ID_AUDIO_FORMAT')
+		return self._meta.get('ID_AUDIO_FORMAT', None)
 
 	def resolution(self, format=True):
 		try:
