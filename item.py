@@ -25,7 +25,7 @@ def format_size(size):
 		s = suffix.pop(0)
 		size /= 1024.0
 
-	return '%d%s' % (round(size), s)
+	return '%2.1f%s' % (size, s)
 
 # natural sorting from http://code.activestate.com/recipes/285264-natural-string-sorting/
 def try_int(s):
@@ -141,7 +141,6 @@ class File(Item):
 			key = row['key']
 			value = row['value']
 			self._meta[key] = value
-		print self._meta
 	
 	def _retrieve_metadata(self):
 		proc = subprocess.Popen(['midentify', self._fullpath], stdout=subprocess.PIPE)
@@ -151,7 +150,9 @@ class File(Item):
 			'ID_VIDEO_FORMAT',
 			'ID_AUDIO_FORMAT',
 			'ID_LENGTH',
-			'ID_SID_[0-9]+_LANG'
+			'ID_SID_[0-9]+_LANG',
+			'ID_VIDEO_WIDTH',
+			'ID_VIDEO_HEIGHT'
 		]]
 
 		meta = []
@@ -189,6 +190,18 @@ class File(Item):
 			m, s = divmod(x, 60)
 			h, m = divmod(m, 60)
 			return '%02d:%02d:%02d' % (h, m, s)
+		return x
+
+	def video_codec(self):
+		return self._meta['ID_VIDEO_FORMAT']
+
+	def audio_codec(self):
+		return self._meta['ID_AUDIO_FORMAT']
+
+	def resolution(self, format=True):
+		x = (int(self._meta['ID_VIDEO_WIDTH']), int(self._meta['ID_VIDEO_HEIGHT']))
+		if format:
+			return '%dx%d' % x
 		return x
 
 	def is_video(self):
