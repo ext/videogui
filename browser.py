@@ -53,7 +53,7 @@ class Browser(object):
         f = Item.create(root, path, path[-1])
 
         id = post['id']
-        value = post['value']
+        value = unicode(post['value'], encoding='utf-8')
 
         # title is a special case, as it is normalized in the database
         if id == 'title':
