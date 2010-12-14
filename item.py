@@ -5,6 +5,7 @@ import os
 import re
 import urllib
 import cherrypy
+import subprocess
 
 def trunc(string, size=35, suffix='..'):
 	""" Truncates a string to size, appending a suffix. """
@@ -122,13 +123,50 @@ class File(Item):
 
 		# query metadata
 		db = cherrypy.thread_data.db.cursor()
-		row = db.execute('SELECT title, hash FROM item WHERE path = :path LIMIT 1', dict(path=self._path)).fetchone()
+		row = db.execute('SELECT title FROM item WHERE path = :path LIMIT 1', dict(path=self._path)).fetchone()
 		if row:
 			self._title = row['title']
-			self._hash = row['hash']
 		else:
+			meta = []
+
+			if self.is_video():
+				meta += self._retrieve_metadata()
+
 			db.execute('INSERT INTO item (path, title) VALUES (:path, :title)', dict(path=self._path, title=self._title))
+			db.executemany('INSERT INTO item_meta (path, key, value) VALUES (?, ?, ?)', meta)
 			cherrypy.thread_data.db.commit()
+
+		self._meta = {}
+		for row in db.execute('SELECT key, value FROM item_meta WHERE path = :path', dict(path=self._path)).fetchall():
+			key = row['key']
+			value = row['value']
+			self._meta[key] = value
+		print self._meta
+	
+	def _retrieve_metadata(self):
+		proc = subprocess.Popen(['midentify', self._fullpath], stdout=subprocess.PIPE)
+		stdout = proc.communicate()[0]
+
+		needed_keys = [re.compile(x) for x in [
+			'ID_VIDEO_FORMAT',
+			'ID_AUDIO_FORMAT',
+			'ID_LENGTH',
+			'ID_SID_[0-9]+_LANG'
+		]]
+
+		meta = []
+		for line in stdout.split("\n"):
+			if line == '':
+				continue
+
+			[key, value] = line.split('=')
+
+			if not any([x.match(key) for x in needed_keys]):
+				continue
+
+			meta.append((self._path, unicode(key), unicode(value, encoding='utf-8')))
+
+		return meta
 
 	def title(self):
 		return self._title
@@ -136,6 +174,22 @@ class File(Item):
 	def set_title(self, title):
 		cherrypy.thread_data.db.cursor().execute('UPDATE item SET title = :title WHERE path = :path', dict(path=self._path, title=title))
 		cherrypy.thread_data.db.commit()
+
+	def basename(self):
+		return self._base
+
+	def size(self, format=True):
+		if format:
+			return format_size(self._size)
+		return self._size
+
+	def length(self, format=True):
+		x = float(self._meta['ID_LENGTH'])
+		if format:
+			m, s = divmod(x, 60)
+			h, m = divmod(m, 60)
+			return '%02d:%02d:%02d' % (h, m, s)
+		return x
 
 	def is_video(self):
 		return self._is_video
@@ -157,7 +211,7 @@ class File(Item):
 			'url': urllib.quote(self._path.encode('utf-8')),
 			'name': tpath,
 			'padding': ' '*(Item.width-len(tpath)),
-			'size': format_size(self._size)
+			'size': self.size(format=True)
 		}
 
 		if not (self.is_video() or self.is_playlist()):
