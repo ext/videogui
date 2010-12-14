@@ -43,7 +43,19 @@ class Browser(object):
         f = Item.create(root, path, path[-1])
         url = urllib.quote(os.path.join(*path).encode('utf-8'))
 
-        return template.render(url=url, file=f)
+        refs = {}
+        for x in cherrypy.request.app.config['refs']:
+            refs[x] = cherrypy.request.app.config['refs'][x]
+        print refs
+
+        # meta data which is always visible
+        meta = {
+            'Genre': None,
+            'Tags': None,
+            'Year': None
+        }
+
+        return template.render(url=url, file=f, refs=refs, meta=meta)
 
     @cherrypy.expose
     def put(self, *path, **post):

@@ -17,3 +17,11 @@
     margin: 0;
     padding: 0;
 }
+
+.edit {
+    color: #000;
+}
+
+.static {
+    color: #888;
+}

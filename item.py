@@ -185,7 +185,7 @@ class File(Item):
 		return self._size
 
 	def length(self, format=True):
-		x = float(self._meta['ID_LENGTH'])
+		x = float(self._meta.get('ID_LENGTH', 0))
 		if format:
 			m, s = divmod(x, 60)
 			h, m = divmod(m, 60)
@@ -193,13 +193,18 @@ class File(Item):
 		return x
 
 	def video_codec(self):
-		return self._meta['ID_VIDEO_FORMAT']
+		return self._meta.get('ID_VIDEO_FORMAT', None)
 
 	def audio_codec(self):
-		return self._meta['ID_AUDIO_FORMAT']
+		return self._meta.get('ID_AUDIO_FORMAT')
 
 	def resolution(self, format=True):
-		x = (int(self._meta['ID_VIDEO_WIDTH']), int(self._meta['ID_VIDEO_HEIGHT']))
+		try:
+			x = (int(self._meta['ID_VIDEO_WIDTH']),
+			     int(self._meta['ID_VIDEO_HEIGHT']))
+		except KeyError:
+			return None
+
 		if format:
 			return '%dx%d' % x
 		return x
