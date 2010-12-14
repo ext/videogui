@@ -11,9 +11,8 @@
          tooltip   : 'Click to edit...',
          placeholder: '<span class="static">(unset)</span>',
          event     : 'start_edit',
-         oncancel: function() {
-            $(this).next().show();
-        }
+         oncancel: function() { $(this).next().show(); },
+         callback: function() { $(this).next().show(); }
      });
 
     $('.edit-activate').click(function() {
