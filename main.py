@@ -13,6 +13,10 @@ def connect(*args):
         cherrypy.thread_data.db = sqlite3.connect('site.db')
         cherrypy.thread_data.db.row_factory = sqlite3.Row
         cherrypy.thread_data.db.cursor().execute('PRAGMA foreign_keys = ON')
+	cherrypy.thread_data.db.cursor().execute('CREATE TABLE IF NOT EXISTS item (id INT PRIMARY KEY, path TEXT NOT NULL UNIQUE, title TEXT)')
+	cherrypy.thread_data.db.cursor().execute('CREATE TABLE IF NOT EXISTS item_meta (path TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, UNIQUE(path, key))')
+	cherrypy.thread_data.db.commit()
+
 
 cherrypy.engine.subscribe('start_thread', connect)
 

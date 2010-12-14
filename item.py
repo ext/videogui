@@ -143,7 +143,7 @@ class File(Item):
 		if self.is_video():
 			meta += self._retrieve_metadata()
 
-		cherrypy.thread_data.db.executemany('INSERT INTO item_meta (path, key, value) VALUES (?, ?, ?)', meta)
+		cherrypy.thread_data.db.executemany('REPLACE INTO item_meta (path, key, value) VALUES (?, ?, ?)', meta)
 		cherrypy.thread_data.db.commit()
 		
 	
