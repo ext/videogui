@@ -188,7 +188,7 @@ class File(Item):
 		return self._meta[key]
 
 	def get_meta(self, key, default=None):
-		return self._meta.get(key, default)			
+		return self._meta.get(key, default)
 
 	def size(self, format=True):
 		if format:
