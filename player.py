@@ -22,7 +22,7 @@ class Player:
 			'vlc': self._cvlc
 			}
 
-		self._proc = pymplb.MPlayer(fs=True, env={'DISPLAY': ':0', 'TERM': 'xterm'})
+		self._proc = pymplb.MPlayer(fs=True, env={'DISPLAY': ':0', 'TERM': 'xterm', 'HOME': os.environ['HOME']})
 
 	def is_playing(self):
 		return self._proc.p_filename != None
